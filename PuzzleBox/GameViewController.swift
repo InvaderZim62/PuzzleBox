@@ -80,16 +80,7 @@ class GameViewController: UIViewController {
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-//        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg
-        rotateCameraAroundBoardCenter(deltaAngle: 0)
+        cameraNode.position = SCNVector3(0, 0, 3 * Box.length)
         scnScene.rootNode.addChildNode(cameraNode)
-    }
-    
-    // rotate camera around board x-axis, while continuing to point at board center
-    private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
-        cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
-        let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
-        let cameraDistance = max(9.7 * scnView.frame.height / scnView.frame.width, 40)
-        cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
     }
 }
