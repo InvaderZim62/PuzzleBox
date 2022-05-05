@@ -14,6 +14,13 @@ import UIKit
 import QuartzCore
 import SceneKit
 
+struct Box {
+    static let length = 15.0
+    static let height = 10.0
+    static let width = 10.0
+    static let thickness = 0.5
+}
+
 class GameViewController: UIViewController {
     
     private var scnView: SCNView!
@@ -25,6 +32,28 @@ class GameViewController: UIViewController {
         setupView()
         setupScene()
         setupCamera()
+        
+        let horizontalOffset = Box.length / 2 - 1.5 * Wall.thickness
+        let verticalOffset = Box.height / 2 - 1.5 * Wall.thickness
+
+        let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, isLeft: true)
+        leftSideNode.position = SCNVector3(-horizontalOffset, 0, 0)
+        scnScene.rootNode.addChildNode(leftSideNode)
+        
+        let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, isLeft: false)
+        rightSideNode.position = SCNVector3(horizontalOffset, -Wall.thickness / 2, 0)
+        rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)
+        scnScene.rootNode.addChildNode(rightSideNode)
+        
+        let topSideNode = MovableSideNode(width: Box.width, height: Box.length, isLeft: false)
+        topSideNode.position = SCNVector3(Wall.thickness / 2, verticalOffset, 0)
+        topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
+        scnScene.rootNode.addChildNode(topSideNode)
+        
+        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length, isLeft: false)
+        floorSideNode.position = SCNVector3(Wall.thickness / 2, -verticalOffset, 0)
+        floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
+        scnScene.rootNode.addChildNode(floorSideNode)
     }
     
     // MARK: - Setup functions
@@ -46,7 +75,8 @@ class GameViewController: UIViewController {
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg
+//        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg
+        rotateCameraAroundBoardCenter(deltaAngle: 0)
         scnScene.rootNode.addChildNode(cameraNode)
     }
     
@@ -54,7 +84,7 @@ class GameViewController: UIViewController {
     private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
         cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
         let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
-        let cameraDistance = max(9.7 * scnView.frame.height / scnView.frame.width, 15)
+        let cameraDistance = max(9.7 * scnView.frame.height / scnView.frame.width, 40)
         cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
     }
 }
