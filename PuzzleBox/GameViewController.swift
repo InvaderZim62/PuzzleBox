@@ -17,9 +17,10 @@ import QuartzCore
 import SceneKit
 
 struct Box {
-    static let length = 15.0
+    static let length = 15.0  // web-site dimensions divided by 10
     static let height = 10.0
     static let width = 10.0
+    static let wallThickness = 0.5
 }
 
 class GameViewController: UIViewController {
@@ -37,24 +38,24 @@ class GameViewController: UIViewController {
     }
     
     private func createPuzzleBox() {
-        let horizontalOffset = Box.length / 2 - 1.5 * Wall.thickness
-        let verticalOffset = Box.height / 2 - 1.5 * Wall.thickness
+        let horizontalOffset = Box.length / 2 - 1.5 * Box.wallThickness
+        let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
 
-        let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, isLeft: true)
+        let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
         
-        let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, isLeft: false)
-        rightSideNode.position = SCNVector3(horizontalOffset, -Wall.thickness / 2, 0)
+        let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
+        rightSideNode.position = SCNVector3(horizontalOffset, -Box.wallThickness / 2, 0)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
         
-        let topSideNode = MovableSideNode(width: Box.width, height: Box.length, isLeft: false)
-        topSideNode.position = SCNVector3(Wall.thickness / 2, verticalOffset, 0)
+        let topSideNode = MovableSideNode(width: Box.width, height: Box.length, wallThickness: Box.wallThickness, isLeft: false)
+        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset, 0)
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(topSideNode)
         
-        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Wall.thickness, isLeft: false)
+        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
         floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
         floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(floorSideNode)
