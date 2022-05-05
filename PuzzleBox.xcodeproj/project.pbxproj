@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4ADC60A3282347C9008A1EF4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADC60A2282347C9008A1EF4 /* AppDelegate.swift */; };
-		4ADC60A5282347C9008A1EF4 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADC60A4282347C9008A1EF4 /* art.scnassets */; };
 		4ADC60A7282347C9008A1EF4 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ADC60A6282347C9008A1EF4 /* GameViewController.swift */; };
 		4ADC60AA282347C9008A1EF4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4ADC60A8282347C9008A1EF4 /* Main.storyboard */; };
 		4ADC60AC282347CB008A1EF4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADC60AB282347CB008A1EF4 /* Assets.xcassets */; };
@@ -18,7 +17,6 @@
 /* Begin PBXFileReference section */
 		4ADC609F282347C9008A1EF4 /* PuzzleBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PuzzleBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ADC60A2282347C9008A1EF4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4ADC60A4282347C9008A1EF4 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		4ADC60A6282347C9008A1EF4 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		4ADC60A9282347C9008A1EF4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4ADC60AB282347CB008A1EF4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -55,14 +53,21 @@
 		4ADC60A1282347C9008A1EF4 /* PuzzleBox */ = {
 			isa = PBXGroup;
 			children = (
-				4ADC60A2282347C9008A1EF4 /* AppDelegate.swift */,
-				4ADC60A4282347C9008A1EF4 /* art.scnassets */,
-				4ADC60A6282347C9008A1EF4 /* GameViewController.swift */,
 				4ADC60A8282347C9008A1EF4 /* Main.storyboard */,
+				4ADC60A6282347C9008A1EF4 /* GameViewController.swift */,
+				4ADC60B628234A57008A1EF4 /* Supporting Files */,
+			);
+			path = PuzzleBox;
+			sourceTree = "<group>";
+		};
+		4ADC60B628234A57008A1EF4 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				4ADC60A2282347C9008A1EF4 /* AppDelegate.swift */,
 				4ADC60AB282347CB008A1EF4 /* Assets.xcassets */,
 				4ADC60AD282347CB008A1EF4 /* LaunchScreen.storyboard */,
 			);
-			path = PuzzleBox;
+			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -123,7 +128,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4ADC60A5282347C9008A1EF4 /* art.scnassets in Resources */,
 				4ADC60AF282347CB008A1EF4 /* LaunchScreen.storyboard in Resources */,
 				4ADC60AC282347CB008A1EF4 /* Assets.xcassets in Resources */,
 				4ADC60AA282347C9008A1EF4 /* Main.storyboard in Resources */,
@@ -293,6 +297,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -321,6 +326,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
