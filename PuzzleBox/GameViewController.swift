@@ -20,7 +20,6 @@ struct Box {
     static let length = 15.0
     static let height = 10.0
     static let width = 10.0
-    static let thickness = 0.5
 }
 
 class GameViewController: UIViewController {
@@ -55,7 +54,7 @@ class GameViewController: UIViewController {
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(topSideNode)
         
-        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.thickness, isLeft: false)
+        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Wall.thickness, isLeft: false)
         floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
         floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(floorSideNode)
