@@ -4,6 +4,8 @@
 //
 //  Created by Phil Stern on 5/4/22.
 //
+//  Japanese puzzle box design from: https://dictum.com/en/blog/tutorials/build-your-own-japanese-puzzle-box
+//
 //  Initial setup: File | New | Project... | Game (Game Technology: SceneKit)
 //  TARGETS | Deployment Info | iOS 12.4
 //  PROJECT | Deployment Target | iOS Deployment Target: 12.4  <- if warning "built for newer iOS Simulator version...", make this change and Clean Build Folder
@@ -32,7 +34,10 @@ class GameViewController: UIViewController {
         setupView()
         setupScene()
         setupCamera()
-        
+        createPuzzleBox()
+    }
+    
+    private func createPuzzleBox() {
         let horizontalOffset = Box.length / 2 - 1.5 * Wall.thickness
         let verticalOffset = Box.height / 2 - 1.5 * Wall.thickness
 
@@ -50,8 +55,8 @@ class GameViewController: UIViewController {
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(topSideNode)
         
-        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length, isLeft: false)
-        floorSideNode.position = SCNVector3(Wall.thickness / 2, -verticalOffset, 0)
+        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.thickness, isLeft: false)
+        floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
         floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
         scnScene.rootNode.addChildNode(floorSideNode)
     }
