@@ -11,6 +11,14 @@
 //  PROJECT | Deployment Target | iOS Deployment Target: 12.4  <- if warning "built for newer iOS Simulator version...", make this change and Clean Build Folder
 //  Delete art.scnassets (move to Trash)
 //
+//  Lessons learned:
+//  - parent node's physics properties don't propagate to children (set each child separately)
+//  - nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions)
+//  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class
+//  - flattened node's physics body shape does not follow the individual children closely, and can't be adjusted
+//  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
+//  - flattenedClone() requires parent node to implement override init() { super.init() }
+//
 
 import UIKit
 import QuartzCore
@@ -78,20 +86,20 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         sideNodes.append(leftSideNode)
         
         let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
+        rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
         rightSideNode.position = SCNVector3(horizontalOffset, -Box.wallThickness / 2, 0)
-        rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
         sideNodes.append(rightSideNode)
 
         let topSideNode = MovableSideNode(width: Box.width, height: Box.length, wallThickness: Box.wallThickness, isLeft: false)
-        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset, 0)
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
+        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset, 0)
         scnScene.rootNode.addChildNode(topSideNode)
         sideNodes.append(topSideNode)
 
         let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
-        floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
         floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
+        floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
         scnScene.rootNode.addChildNode(floorSideNode)
         sideNodes.append(floorSideNode)
     }
