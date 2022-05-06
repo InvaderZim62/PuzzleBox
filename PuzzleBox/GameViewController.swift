@@ -29,6 +29,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var scnScene: SCNScene!
     var cameraNode: SCNNode!
     
+    var pastLocation = CGPoint.zero
     var isCameraPanning = true
     var sideNodes = [MovableSideNode]()
     var selectedSideNode: MovableSideNode? {
@@ -120,12 +121,39 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         return sideNode
     }
 
-    // if side selected, move it along pan gesture
+    // if a side is selected, move it along pan gesture
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         if isCameraPanning {
             recognizer.state = .failed  // force my pan gesture to fail, so camera's pan gesture can take over
             return
         }
+        let location = recognizer.location(in: scnView)
+        if let pannedSideNode = selectedSideNode {
+            // move selected side
+            switch recognizer.state {
+            case .changed:
+                // move pannedSideNode to pan location (moves in plane of surface being touched)
+                if let sideCoordinates = getSideCoordinatesAt(location), let pastSideCoordinates = getSideCoordinatesAt(pastLocation) {
+                    let deltaSideCoordinates = sideCoordinates - pastSideCoordinates
+                    pannedSideNode.localTranslate(by: deltaSideCoordinates)
+                }
+            case .ended, .cancelled:
+                break
+            default:
+                break
+            }
+        }
+        pastLocation = location
+    }
+    
+    // convert from screen to selected side coordinates
+    private func getSideCoordinatesAt(_ location: CGPoint) -> SCNVector3? {
+        var sideCoordinates: SCNVector3?
+        let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])
+        if let result = hitResults.first(where: { $0.node.parent == selectedSideNode }) {  // must be touching selectedSideNode
+            sideCoordinates = result.localCoordinates
+        }
+        return sideCoordinates
     }
 
     // MARK: - Setup functions
