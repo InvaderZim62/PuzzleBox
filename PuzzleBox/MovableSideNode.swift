@@ -35,25 +35,24 @@ class MovableSideNode: SCNNode {
         let yPosition = isLeft ? Float(wallThickness) / 2 : 0
         
         outside = SCNBox(width: wallThickness, height: outsideHeight, length: width - 2 * wallThickness, chamferRadius: 0)
-        outside.firstMaterial?.diffuse.contents = Wall.outsideColors[number]
-        let outsideNode = SCNNode(geometry: outside)
+        let outsideNode = createNodeFrom(geometry: outside, withColor: Wall.outsideColors[number])
         outsideNode.position = SCNVector3(x: -Float(wallThickness), y: 0, z: 0)
-        outsideNode.physicsBody = SCNPhysicsBody.static()
-        addChildNode(outsideNode)
         
         let middle = SCNBox(width: wallThickness, height: height - 3 * wallThickness, length: width - 4 * wallThickness, chamferRadius: 0)
-        middle.firstMaterial?.diffuse.contents = Wall.middleColors[number]
-        let middleNode = SCNNode(geometry: middle)
+        let middleNode = createNodeFrom(geometry: middle, withColor: Wall.middleColors[number])
         middleNode.position = SCNVector3(x: 0, y: yPosition, z: 0)
-        middleNode.physicsBody = SCNPhysicsBody.static()
-        addChildNode(middleNode)
         
         let inside = SCNBox(width: wallThickness, height: height - 5 * wallThickness, length: width - 2 * wallThickness, chamferRadius: 0)
-        inside.firstMaterial?.diffuse.contents = Wall.insideColors[number]
-        let insideNode = SCNNode(geometry: inside)
+        let insideNode = createNodeFrom(geometry: inside, withColor: Wall.insideColors[number])
         insideNode.position = SCNVector3(x: Float(wallThickness), y: yPosition, z: 0)
-        insideNode.physicsBody = SCNPhysicsBody.static()
-        addChildNode(insideNode)
+    }
+    
+    private func createNodeFrom(geometry: SCNGeometry, withColor color: UIColor) -> SCNNode {
+        geometry.firstMaterial?.diffuse.contents = color
+        let node = SCNNode(geometry: geometry)
+        node.physicsBody = SCNPhysicsBody.kinematic()
+        addChildNode(node)
+        return node
     }
     
     func highlightColor() {
