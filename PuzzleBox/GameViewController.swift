@@ -79,27 +79,28 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func createPuzzleBox() {
         let horizontalOffset = Box.length / 2 - 1.5 * Box.wallThickness
         let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
+        let gap = 0.01
 
         let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
-        leftSideNode.position = SCNVector3(-horizontalOffset, 0, 0)
+        leftSideNode.position = SCNVector3(-horizontalOffset - gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
         sideNodes.append(leftSideNode)
         
         let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
-        rightSideNode.position = SCNVector3(horizontalOffset, -Box.wallThickness / 2, 0)
+        rightSideNode.position = SCNVector3(horizontalOffset + gap, -Box.wallThickness / 2, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
         sideNodes.append(rightSideNode)
 
         let topSideNode = MovableSideNode(width: Box.width, height: Box.length, wallThickness: Box.wallThickness, isLeft: false)
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
-        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset, 0)
+        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset + gap, 0)
         scnScene.rootNode.addChildNode(topSideNode)
         sideNodes.append(topSideNode)
 
         let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
         floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
-        floorSideNode.position = SCNVector3(0, -verticalOffset, 0)
+        floorSideNode.position = SCNVector3(0, -verticalOffset - gap, 0)
         scnScene.rootNode.addChildNode(floorSideNode)
         sideNodes.append(floorSideNode)
     }
