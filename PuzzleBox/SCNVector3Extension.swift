@@ -16,6 +16,10 @@ extension SCNVector3 {
         return SCNVector3(x: lhs.x - rhs.x, y: lhs.y - rhs.y, z: lhs.z - rhs.z)
     }
     
+    static func *(lhs: SCNVector3, rhs: Double) -> SCNVector3 {
+        return SCNVector3(x: lhs.x * Float(rhs), y: lhs.y * Float(rhs), z: lhs.z * Float(rhs))
+    }
+
     func distance(from: SCNVector3) -> Float {
         return sqrt(pow(from.x - self.x, 2) + pow(from.y - self.y, 2) + pow(from.z - self.z, 2))
     }

@@ -41,12 +41,13 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var pastLocation = CGPoint.zero
     var isCameraPanning = true
     var sideNodes = [MovableSideNode]()
-    var selectedSideNode: MovableSideNode? {
+    var deltaPan = SCNVector3(0, 0, 0)
+    var selectedSideNode: MovableSideNode? {  // highlight side node when selected
         didSet {
             sideNodes.forEach { $0.resetColor() }  // reset all colors, before highlighting selected node (if any)
             if let selectedNode = selectedSideNode {
                 selectedNode.highlightColor()
-                isCameraPanning = false  // don't allow camera panning when a side node is selected
+                isCameraPanning = false  // turn off camera panning when a side node is selected
             } else {
                 isCameraPanning = true
             }
@@ -113,7 +114,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         let location = recognizer.location(in: scnView)
         if let tappedSideNode = getSideNodeAt(location) {
             // a side node was tapped (toggle its selection)
-            selectedSideNode = selectedSideNode == tappedSideNode ? nil : tappedSideNode
+            selectedSideNode = selectedSideNode == tappedSideNode ? nil : tappedSideNode  // toggle between nil and tappedSideNode
         } else {
             // nothing was tapped (deselect all side nodes)
             selectedSideNode = nil
@@ -129,7 +130,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         }
         return sideNode
     }
-
+    
     // if a side is selected, move it along pan gesture
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         if isCameraPanning {
@@ -137,17 +138,15 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
             return
         }
         let location = recognizer.location(in: scnView)
-        if let pannedSideNode = selectedSideNode {
+        if let selectedSideNode = selectedSideNode {
             // move selected side
             switch recognizer.state {
             case .changed:
-                // move pannedSideNode to pan location (moves in plane of surface being touched)
+                // move selectedSideNode to pan location (moves in plane of surface being touched)
                 if let sideCoordinates = getSideCoordinatesAt(location), let pastSideCoordinates = getSideCoordinatesAt(pastLocation) {
-                    let deltaSideCoordinates = sideCoordinates - pastSideCoordinates
-                    pannedSideNode.localTranslate(by: deltaSideCoordinates)
+                    deltaPan = sideCoordinates - pastSideCoordinates
+                    selectedSideNode.localTranslate(by: deltaPan)  // contacts are prevented in render, below
                 }
-            case .ended, .cancelled:
-                break
             default:
                 break
             }
@@ -164,7 +163,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         }
         return sideCoordinates
     }
-
+    
     // MARK: - Setup functions
     
     private func setupView() {
@@ -173,6 +172,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         scnView.showsStatistics = true
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
+        scnView.delegate = self  // needed for renderer, below
     }
     
     private func setupScene() {
@@ -193,5 +193,38 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     // allow two simultaneous pan gesture recognizers (mine and the camera's)
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+}
+
+extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.delegate = self
+    
+    // use willRenderScene, to prevent contacts before they render (prevents jitter)
+    func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        preventContacts()
+    }
+    
+    // if contact is made, back it out by amount of penetration
+    func preventContacts() {
+        if let selectedSideNode = selectedSideNode {
+            if let contact = contactWith(selectedSideNode) {
+                let transform = SCNMatrix4MakeTranslation((contact.contactNormal.x) * Float(contact.penetrationDistance),
+                                                          (contact.contactNormal.y) * Float(contact.penetrationDistance),
+                                                          (contact.contactNormal.z) * Float(contact.penetrationDistance))
+                selectedSideNode.transform = SCNMatrix4Mult(selectedSideNode.transform, transform)
+            }
+        }
+    }
+    
+    // return contact if any child of input node is contacting a node not belonging to its parent (non-sibling)
+    private func contactWith(_ parentNode: MovableSideNode) -> SCNPhysicsContact? {
+        for childNode in parentNode.childNodes {
+            let contacts = scnScene.physicsWorld.contactTest(with: childNode.physicsBody!, options: nil)
+            for contact in contacts {
+                if contact.nodeA.parent != parentNode || contact.nodeB.parent != parentNode {
+                    return contact
+                }
+            }
+        }
+        return nil
     }
 }
