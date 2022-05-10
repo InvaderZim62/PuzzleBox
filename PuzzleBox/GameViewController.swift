@@ -13,8 +13,8 @@
 //
 //  Lessons learned:
 //  - parent node's physics properties don't propagate to children (set each child separately)
-//  - nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions)
-//  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class
+//  - nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions, if dynamic)
+//  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class (flattening not used in this app)
 //  - flattened node's physics body shape does not follow the individual children closely, and can't be adjusted
 //  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
@@ -104,6 +104,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         floorSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
         scnScene.rootNode.addChildNode(floorSideNode)
         sideNodes.append(floorSideNode)
+        
+        let boxNode = InnerBoxNode(width: Box.length, height: Box.height, depth: Box.width, wallThickness: Box.wallThickness)
+        boxNode.position = SCNVector3(0, 0, 0)
+        scnScene.rootNode.addChildNode(boxNode)
     }
     
     // MARK: - Gesture actions
