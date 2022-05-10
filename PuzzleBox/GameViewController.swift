@@ -20,8 +20,7 @@
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
 //  To do...
-//  - instead of selecting a panel with a tap gesture, select it when panning starts on a side panel; if panning starts off of
-//    all panels, use it to rotate camera
+//  - panel that is not close to perpendicular to camera can be panned through other panels
 //
 
 import UIKit
@@ -46,17 +45,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var isCameraPanning = true
     var sideNodes = [MovableSideNode]()
     var deltaPanWorld = SCNVector3(0, 0, 0)
-    var selectedSideNode: MovableSideNode? {  // highlight side node when selected
-        didSet {
-            sideNodes.forEach { $0.resetColor() }  // reset all colors, before highlighting selected node (if any)
-            if let selectedNode = selectedSideNode {
-                selectedNode.highlightColor()
-                isCameraPanning = false  // turn off camera panning when a side node is selected
-            } else {
-                isCameraPanning = true
-            }
-        }
-    }
+    var selectedSideNode: MovableSideNode?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,11 +59,8 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         pan.maximumNumberOfTouches = 1  // prevents panning during rotation
         pan.delegate = self  // allows system to call gestureRecognizer (bottom of file)
         scnView.addGestureRecognizer(pan)
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        tap.require(toFail: pan)  // prevents tap from being called right before pan gesture ends (deselecting side node)
-        scnView.addGestureRecognizer(tap)
         
-        // require my pan gesture to fail, before allowing camera's pan gesture to work (force my pan to fail in handlePan, if isCameraPanning)
+        // require my pan gesture to fail, before allowing camera's pan gesture to work (force my pan to fail in handlePan)
         let panGestures = scnView.gestureRecognizers!.filter { $0 is UIPanGestureRecognizer } as! [UIPanGestureRecognizer]  // my pan and default camera pan
         if !panGestures.isEmpty {
             let cameraPanGesture = panGestures.first!
@@ -117,19 +103,6 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     }
     
     // MARK: - Gesture actions
-
-    // if tap on side node, toggle between selecting and deselecting it (all others are deselected)
-    // if tap on nothing, deselect all
-    @objc func handleTap(recognizer: UITapGestureRecognizer) {  // Note: system calls tap gesture at start of pan gesture
-        let location = recognizer.location(in: scnView)
-        if let tappedSideNode = getSideNodeAt(location) {
-            // a side node was tapped (toggle its selection)
-            selectedSideNode = selectedSideNode == tappedSideNode ? nil : tappedSideNode  // toggle between nil and tappedSideNode
-        } else {
-            // nothing was tapped (deselect all side nodes)
-            selectedSideNode = nil
-        }
-    }
     
     // get side node at location provided by tap gesture
     private func getSideNodeAt(_ location: CGPoint) -> MovableSideNode? {
@@ -143,11 +116,16 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     
     // if a side is selected, move it along pan gesture
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
-        if isCameraPanning {
+        let location = recognizer.location(in: scnView)  // screen coordinates
+        if let tappedSideNode = getSideNodeAt(location) {
+            // pan started on a side node (toggle its selection)
+            selectedSideNode = tappedSideNode
+        } else {
+            // pan started off of a side node (deselect all side nodes)
+            selectedSideNode = nil
             recognizer.state = .failed  // force my pan gesture to fail, so camera's pan gesture can take over
             return
         }
-        let location = recognizer.location(in: scnView)  // screen coordinates
         if let selectedSideNode = selectedSideNode {
             // move selected side
             switch recognizer.state {
