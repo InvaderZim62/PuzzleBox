@@ -19,6 +19,10 @@
 //  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
+//  To do...
+//  - instead of selecting a panel with a tap gesture, select it when panning starts on a side panel; if panning starts off of
+//    all panels, use it to rotate camera
+//
 
 import UIKit
 import QuartzCore
@@ -192,8 +196,16 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func setupCamera() {
         cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
-        cameraNode.position = SCNVector3(0, 0, 3 * Box.length)
+        rotateCameraAroundBoardCenter(deltaAngle: -.pi/4)  // move up 45 deg (looking down)
         scnScene.rootNode.addChildNode(cameraNode)
+    }
+
+    // rotate camera around scene x-axis, while continuing to point at scene center
+    private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
+        cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
+        let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
+        let cameraDistance = CGFloat(3 * Box.length)
+        cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
     }
 
     // MARK: - UIGestureRecognizerDelegate
