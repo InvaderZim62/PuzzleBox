@@ -104,17 +104,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     
     // MARK: - Gesture actions
     
-    // get side node at location provided by tap gesture
-    private func getSideNodeAt(_ location: CGPoint) -> MovableSideNode? {
-        var sideNode: MovableSideNode?
-        let hitResults = scnView.hitTest(location, options: nil)  // nil returns closest hit
-        if let result = hitResults.first(where: { $0.node.parent?.name == "Side" }) {
-            sideNode = result.node.parent as? MovableSideNode
-        }
-        return sideNode
-    }
-    
-    // if a side is selected, move it along pan gesture
+    // if panning on a side node, move it with the pan gesture, else pan the camera
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         let location = recognizer.location(in: scnView)  // screen coordinates
         if let tappedSideNode = getSideNodeAt(location) {
@@ -144,6 +134,16 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         pastLocation = location
     }
     
+    // get side node at location provided by tap gesture
+    private func getSideNodeAt(_ location: CGPoint) -> MovableSideNode? {
+        var sideNode: MovableSideNode?
+        let hitResults = scnView.hitTest(location, options: nil)  // nil returns closest hit
+        if let result = hitResults.first(where: { $0.node.parent?.name == "Side" }) {
+            sideNode = result.node.parent as? MovableSideNode
+        }
+        return sideNode
+    }
+
     // convert from screen to local (sideNode) and world (scene) coordinates
     private func getSideCoordinatesAt(_ location: CGPoint) -> (local: SCNVector3, world: SCNVector3)? {
         var sideCoordinates: (SCNVector3, SCNVector3)?
@@ -202,7 +202,7 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
     }
     
     // if contact is made, back it out by amount of penetration
-    // from: https://stackoverflow.com/questions/46843254
+    // based on: https://stackoverflow.com/questions/46843254
     func preventContacts() {
         if let selectedSideNode = selectedSideNode {
             if let contact = contactWith(selectedSideNode) {
