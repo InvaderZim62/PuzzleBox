@@ -41,7 +41,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var pastLocation = CGPoint.zero
     var isCameraPanning = true
     var sideNodes = [MovableSideNode]()
-    var deltaPan = SCNVector3(0, 0, 0)
+    var deltaPanWorld = SCNVector3(0, 0, 0)
     var selectedSideNode: MovableSideNode? {  // highlight side node when selected
         didSet {
             sideNodes.forEach { $0.resetColor() }  // reset all colors, before highlighting selected node (if any)
@@ -83,11 +83,13 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
 
         let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
+//        let leftSideNode = MovableSideNode(width: 2 * Box.width, height: 2 * Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
         sideNodes.append(leftSideNode)
         
         let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
+//        let rightSideNode = MovableSideNode(width: 2 * Box.width, height: 2 * Box.height, wallThickness: Box.wallThickness, isLeft: false)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
         rightSideNode.position = SCNVector3(horizontalOffset + Box.gap, -Box.wallThickness / 2, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
@@ -141,15 +143,17 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
             recognizer.state = .failed  // force my pan gesture to fail, so camera's pan gesture can take over
             return
         }
-        let location = recognizer.location(in: scnView)
+        let location = recognizer.location(in: scnView)  // screen coordinates
         if let selectedSideNode = selectedSideNode {
             // move selected side
             switch recognizer.state {
             case .changed:
                 // move selectedSideNode to pan location (moves in plane of surface being touched)
                 if let sideCoordinates = getSideCoordinatesAt(location), let pastSideCoordinates = getSideCoordinatesAt(pastLocation) {
-                    deltaPan = sideCoordinates - pastSideCoordinates
-                    selectedSideNode.localTranslate(by: deltaPan)  // contacts are prevented in render, below
+                    let deltaPanLocal = sideCoordinates.local - pastSideCoordinates.local
+                    deltaPanWorld = sideCoordinates.world - pastSideCoordinates.world
+//                    print(deltaPanWorld)
+                    selectedSideNode.localTranslate(by: deltaPanLocal)  // contacts are prevented in render, below
                 }
             default:
                 break
@@ -158,12 +162,12 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         pastLocation = location
     }
     
-    // convert from screen to selected side coordinates
-    private func getSideCoordinatesAt(_ location: CGPoint) -> SCNVector3? {
-        var sideCoordinates: SCNVector3?
+    // convert from screen to local (sideNode) and world (scene) coordinates
+    private func getSideCoordinatesAt(_ location: CGPoint) -> (local: SCNVector3, world: SCNVector3)? {
+        var sideCoordinates: (SCNVector3, SCNVector3)?
         let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])
         if let result = hitResults.first(where: { $0.node.parent == selectedSideNode }) {  // must be touching selectedSideNode
-            sideCoordinates = result.localCoordinates
+            sideCoordinates = (result.localCoordinates, result.worldCoordinates)
         }
         return sideCoordinates
     }
@@ -208,13 +212,16 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
     }
     
     // if contact is made, back it out by amount of penetration
+    // from: https://stackoverflow.com/questions/46843254
     func preventContacts() {
         if let selectedSideNode = selectedSideNode {
             if let contact = contactWith(selectedSideNode) {
-                let transform = SCNMatrix4MakeTranslation((contact.contactNormal.x) * Float(contact.penetrationDistance),
-                                                          (contact.contactNormal.y) * Float(contact.penetrationDistance),
-                                                          (contact.contactNormal.z) * Float(contact.penetrationDistance))
+                let penetration = Float(contact.penetrationDistance)
+                let transform = SCNMatrix4MakeTranslation((contact.contactNormal.x) * penetration,
+                                                          (contact.contactNormal.y) * penetration,
+                                                          (contact.contactNormal.z) * penetration)
                 selectedSideNode.transform = SCNMatrix4Mult(selectedSideNode.transform, transform)
+                deltaPanWorld = SCNVector3(0, 0, 0)
             }
         }
     }
@@ -225,7 +232,11 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
             let contacts = scnScene.physicsWorld.contactTest(with: childNode.physicsBody!, options: nil)
             for contact in contacts {
                 if contact.nodeA.parent != parentNode || contact.nodeB.parent != parentNode {
-                    return contact
+                    if contact.contactNormal * deltaPanWorld < -0.01 {
+                        // contact is in opposite direction of pan by a sufficient threshold
+//                        print(contact.contactNormal, deltaPanWorld, contact.contactNormal * deltaPanWorld)
+                        return contact
+                    }
                 }
             }
         }

@@ -33,28 +33,28 @@ class InnerBoxNode: SCNNode {
         addChildNode(sideNode)
 
         let topRail = SCNBox(width: width - 4 * wallThickness, height: tolerance * wallThickness, length: tolerance * wallThickness, chamferRadius: 0)
-        let topRailNode = createNodeFrom(geometry: topRail, withColor: Wall.middleColors.last!)
+        let topRailNode = createNodeFrom(geometry: topRail, withColor: Wall.railColor)
         topRailNode.position = SCNVector3(x: -Float(wallThickness),
                                           y: Float((height - 3 * wallThickness) / 2 + Box.gap),
                                           z: -sign * Float(tolerance * wallThickness))
         sideNode.addChildNode(topRailNode)
 
         let bottomRail = SCNBox(width: width - 4 * wallThickness, height: tolerance * wallThickness, length: tolerance * wallThickness, chamferRadius: 0)
-        let bottomRailNode = createNodeFrom(geometry: bottomRail, withColor: Wall.middleColors.last!)
+        let bottomRailNode = createNodeFrom(geometry: bottomRail, withColor: Wall.railColor)
         bottomRailNode.position = SCNVector3(x: Float(wallThickness),
                                              y: -Float((height - 3 * wallThickness) / 2 + Box.gap),
                                              z: -sign * Float(tolerance * wallThickness))
         sideNode.addChildNode(bottomRailNode)
 
         let rightRail = SCNBox(width: tolerance * wallThickness, height: height - 4 * wallThickness, length: tolerance * wallThickness, chamferRadius: 0)
-        let rightRailNode = createNodeFrom(geometry: rightRail, withColor: Wall.middleColors.last!)
+        let rightRailNode = createNodeFrom(geometry: rightRail, withColor: Wall.railColor)
         rightRailNode.position = SCNVector3(x: Float((width - 3 * wallThickness) / 2 + Box.gap),
                                             y: Float(wallThickness),
                                             z: -sign * Float(tolerance * wallThickness))
         sideNode.addChildNode(rightRailNode)
 
         let leftRail = SCNBox(width: tolerance * wallThickness, height: height - 4 * wallThickness, length: tolerance * wallThickness, chamferRadius: 0)
-        let leftRailNode = createNodeFrom(geometry: leftRail, withColor: Wall.middleColors.last!)
+        let leftRailNode = createNodeFrom(geometry: leftRail, withColor: Wall.railColor)
         leftRailNode.position = SCNVector3(x: -Float((width - 3 * wallThickness) / 2 + Box.gap),
                                            y: -Float(wallThickness),
                                            z: -sign * Float(tolerance * wallThickness))
