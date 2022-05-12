@@ -160,7 +160,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func setupView() {
         scnView = self.view as? SCNView
         scnView.allowsCameraControl = true  // allow standard camera controls with swiping
-        scnView.showsStatistics = true
+        scnView.showsStatistics = false
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
         scnView.delegate = self  // needed for renderer, below
@@ -208,9 +208,9 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
         if let selectedSideNode = selectedSideNode {
             if let contact = contactWith(selectedSideNode) {
                 let penetration = Float(contact.penetrationDistance)
-                let transform = SCNMatrix4MakeTranslation((contact.contactNormal.x) * penetration,
-                                                          (contact.contactNormal.y) * penetration,
-                                                          (contact.contactNormal.z) * penetration)
+                let transform = SCNMatrix4MakeTranslation(contact.contactNormal.x * penetration,
+                                                          contact.contactNormal.y * penetration,
+                                                          0)  // don't want/need to correct out-of-scene direction for this puzzle
                 selectedSideNode.transform = SCNMatrix4Mult(selectedSideNode.transform, transform)
 //                print(String(format: "contact: (%.1f, %.1f, %.1f), pan: (%+.3f, %+.3f, %+.3f), mag: %.3f, pen: %.3f",
 //                             contact.contactNormal.x, contact.contactNormal.y, contact.contactNormal.z,
