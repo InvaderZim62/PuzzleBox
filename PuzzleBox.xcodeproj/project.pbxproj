@@ -18,7 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		4ADC609F282347C9008A1EF4 /* PuzzleBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PuzzleBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4ADC609F282347C9008A1EF4 /* Puzzle Box.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Puzzle Box.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ADC60A2282347C9008A1EF4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4ADC60A6282347C9008A1EF4 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		4ADC60A9282347C9008A1EF4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -51,7 +51,7 @@
 		4ADC60A0282347C9008A1EF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4ADC609F282347C9008A1EF4 /* PuzzleBox.app */,
+				4ADC609F282347C9008A1EF4 /* Puzzle Box.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,7 +96,7 @@
 			);
 			name = PuzzleBox;
 			productName = PuzzleBox;
-			productReference = 4ADC609F282347C9008A1EF4 /* PuzzleBox.app */;
+			productReference = 4ADC609F282347C9008A1EF4 /* Puzzle Box.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -316,7 +316,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stern.PuzzleBox;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Puzzle Box";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -345,7 +345,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.stern.PuzzleBox;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Puzzle Box";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
