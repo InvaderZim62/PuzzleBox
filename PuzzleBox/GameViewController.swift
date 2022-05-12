@@ -20,7 +20,6 @@
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
 //  To do...
-//  - panel that is not close to perpendicular to camera can be panned through other panels
 //
 
 import UIKit
@@ -122,9 +121,11 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
             case .changed:
                 // move selectedSideNode to pan location (moves in plane of surface being touched)
                 if let sideCoordinates = getSideCoordinatesAt(location), let pastSideCoordinates = getSideCoordinatesAt(pastLocation) {
-                    let deltaPanLocal = sideCoordinates.local - pastSideCoordinates.local
+                    // in PuzzleBox, the sides only need to move in their local y-direction
+                    // removeXZ only keeps the local y-component of the pan gesture, to reduce jumping through walls
+                    // limitMagnitude helps prevent moving through walls in the allowable pan direction
+                    let deltaPanLocal = (sideCoordinates.local - pastSideCoordinates.local).removeXZ().limitMagnitude(to: 0.1)
                     deltaPanWorld = sideCoordinates.world - pastSideCoordinates.world
-//                    print(deltaPanWorld)
                     selectedSideNode.localTranslate(by: deltaPanLocal)  // contacts are prevented in render, below
                 }
             default:
@@ -211,20 +212,25 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
                                                           (contact.contactNormal.y) * penetration,
                                                           (contact.contactNormal.z) * penetration)
                 selectedSideNode.transform = SCNMatrix4Mult(selectedSideNode.transform, transform)
+//                print(String(format: "contact: (%.1f, %.1f, %.1f), pan: (%+.3f, %+.3f, %+.3f), mag: %.3f, pen: %.3f",
+//                             contact.contactNormal.x, contact.contactNormal.y, contact.contactNormal.z,
+//                             deltaPanWorld.x, deltaPanWorld.y, deltaPanWorld.z,
+//                             contact.contactNormal * deltaPanWorld.removeAllButMax(),
+//                             penetration))
                 deltaPanWorld = SCNVector3(0, 0, 0)
             }
         }
     }
     
     // return contact if any child of input node is contacting a node not belonging to its parent (non-sibling)
-    private func contactWith(_ parentNode: MovableSideNode) -> SCNPhysicsContact? {
-        for childNode in parentNode.childNodes {
+    private func contactWith(_ sideNode: MovableSideNode) -> SCNPhysicsContact? {
+        for childNode in sideNode.childNodes {
             let contacts = scnScene.physicsWorld.contactTest(with: childNode.physicsBody!, options: nil)
             for contact in contacts {
-                if contact.nodeA.parent != parentNode || contact.nodeB.parent != parentNode {
-                    if contact.contactNormal * deltaPanWorld < -0.01 {
-                        // contact is in opposite direction of pan by a sufficient threshold
-//                        print(contact.contactNormal, deltaPanWorld, contact.contactNormal * deltaPanWorld)
+                if contact.nodeA.parent != sideNode || contact.nodeB.parent != sideNode {
+                    // contact with another (different) side node
+                    if contact.contactNormal * deltaPanWorld.removeAllButMax() < -0.01 {
+                        // contact in opposite direction of pan by a sufficient threshold
                         return contact
                     }
                 }
