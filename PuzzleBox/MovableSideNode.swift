@@ -4,6 +4,17 @@
 //
 //  Created by Phil Stern on 5/4/22.
 //
+//           y
+//           |_
+//    width /| /|
+//         /_ / |
+//         | | ---- x
+//  height |/| /
+//         /_|/
+//        z
+//       ->| |<-
+//      thickness
+//
 
 import UIKit
 import SceneKit

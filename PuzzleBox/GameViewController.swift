@@ -13,13 +13,32 @@
 //
 //  Lessons learned:
 //  - parent node's physics properties don't propagate to children (set each child separately)
-//  - nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions, if dynamic)
-//  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class (flattening not used in this app)
+//  - if dynamic, nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions)
+//  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class (flattening is not used in this app)
 //  - flattened node's physics body shape does not follow the individual children closely, and can't be adjusted
 //  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
-//  To do...
+//  Side node orientations:
+//                     Top
+//                      ____ y
+//                     /|
+//         y          z |            y
+//         |            x            | z
+//    Left |____ x             x ____|/ Right
+//        /             x
+//       z              |
+//                y ____|
+//                     /
+//                    z
+//                    Bottom
+//  Notes:
+//  - each side node only needs to move along its local y-axis to solve the puzzle
+//  - handlePan only uses the local y coordinate of the gesture to move the side (minimizes overlapping walls)
+//  - the pan gesture is also computed in world (screen) coordinates
+//  - contact.contactNormal is always in one of the primary screen coordinate directions, since all surfaces are aligned with screen axes
+//  - contacts are corrected if they are opposite the pan direction by some margin
+//  - the correction is made by subtracting contact.penetrationDistance before the scene is rendered
 //
 
 import UIKit
@@ -72,13 +91,11 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
 
         let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
-//        let leftSideNode = MovableSideNode(width: 2 * Box.width, height: 2 * Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
         sideNodes.append(leftSideNode)
         
         let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
-//        let rightSideNode = MovableSideNode(width: 2 * Box.width, height: 2 * Box.height, wallThickness: Box.wallThickness, isLeft: false)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
         rightSideNode.position = SCNVector3(horizontalOffset + Box.gap, -Box.wallThickness / 2, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
@@ -125,7 +142,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
                     // removeXZ only keeps the local y-component of the pan gesture, to reduce jumping through walls
                     // limitMagnitude helps prevent moving through walls in the allowable pan direction
                     let deltaPanLocal = (sideCoordinates.local - pastSideCoordinates.local).removeXZ().limitMagnitude(to: 0.1)
-                    deltaPanWorld = sideCoordinates.world - pastSideCoordinates.world
+                    deltaPanWorld = sideCoordinates.world - pastSideCoordinates.world  // scene coordinates
                     selectedSideNode.localTranslate(by: deltaPanLocal)  // contacts are prevented in render, below
                 }
             default:
@@ -145,11 +162,11 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         return sideNode
     }
 
-    // convert from screen to local (sideNode) and world (scene) coordinates
+    // convert location from screen to local (sideNode) and world (scene) coordinates
     private func getSideCoordinatesAt(_ location: CGPoint) -> (local: SCNVector3, world: SCNVector3)? {
         var sideCoordinates: (SCNVector3, SCNVector3)?
         let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])
-        if let result = hitResults.first(where: { $0.node.parent == selectedSideNode }) {  // must be touching selectedSideNode
+        if let result = hitResults.first(where: { $0.node.parent == selectedSideNode }) {  // hit must be on selectedSideNode
             sideCoordinates = (result.localCoordinates, result.worldCoordinates)
         }
         return sideCoordinates
@@ -229,7 +246,7 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
             for contact in contacts {
                 if contact.nodeA.parent != sideNode || contact.nodeB.parent != sideNode {
                     // contact with another (different) side node
-                    if contact.contactNormal * deltaPanWorld.removeAllButMax() < -0.01 {
+                    if contact.contactNormal * deltaPanWorld < -0.01 {  // both in scene coordinates
                         // contact in opposite direction of pan by a sufficient threshold
                         return contact
                     }
