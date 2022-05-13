@@ -227,14 +227,14 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
                 let penetration = Float(contact.penetrationDistance)
                 let transform = SCNMatrix4MakeTranslation(contact.contactNormal.x * penetration,
                                                           contact.contactNormal.y * penetration,
-                                                          0)  // don't want/need to correct out-of-scene direction for this puzzle
+                                                          0)  // don't want/need to correct out-of-scene contact direction for this puzzle
                 panningSideNode.transform = SCNMatrix4Mult(panningSideNode.transform, transform)
 //                print(String(format: "contact: (%.1f, %.1f, %.1f), pan: (%+.3f, %+.3f, %+.3f), mag: %.3f, pen: %.3f",
 //                             contact.contactNormal.x, contact.contactNormal.y, contact.contactNormal.z,
 //                             deltaPanWorld.x, deltaPanWorld.y, deltaPanWorld.z,
 //                             contact.contactNormal * deltaPanWorld.removeAllButMax(),
 //                             penetration))
-                deltaPanWorld = SCNVector3(0, 0, 0)
+                deltaPanWorld = SCNVector3(0, 0, 0)  // only make one correction, until panning continues (not entirely necessary)
             }
         }
     }
