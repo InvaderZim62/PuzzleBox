@@ -38,7 +38,7 @@
 //  - the pan gesture is also computed in world (screen) coordinates
 //  - contact.contactNormal is always in one of the primary screen coordinate directions, since all surfaces are aligned with screen axes
 //  - contacts are corrected if they are opposite the pan direction by some margin
-//  - the correction is made by subtracting contact.penetrationDistance before the scene is rendered
+//  - the correction is made by subtracting contact.penetrationDistance in the direction of contactNormal before the scene is rendered
 //
 
 import UIKit
@@ -63,7 +63,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var isCameraPanning = true
     var sideNodes = [MovableSideNode]()
     var deltaPanWorld = SCNVector3(0, 0, 0)
-    var selectedSideNode: MovableSideNode?
+    var panningSideNode: MovableSideNode?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -123,27 +123,27 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     // if panning on a side node, move it with the pan gesture, else pan the camera
     @objc func handlePan(recognizer: UIPanGestureRecognizer) {
         let location = recognizer.location(in: scnView)  // screen coordinates
-        if let tappedSideNode = getSideNodeAt(location) {
-            // pan started on a side node (toggle its selection)
-            selectedSideNode = tappedSideNode
+        if let selectedSideNode = getSideNodeAt(location) {
+            // pan started on a side node
+            panningSideNode = selectedSideNode
         } else {
-            // pan started off of a side node (deselect all side nodes)
-            selectedSideNode = nil
+            // pan started off of a side node
+            panningSideNode = nil
             recognizer.state = .failed  // force my pan gesture to fail, so camera's pan gesture can take over
             return
         }
-        if let selectedSideNode = selectedSideNode {
-            // move selected side
+        if let panningSideNode = panningSideNode {
+            // move panning side
             switch recognizer.state {
             case .changed:
-                // move selectedSideNode to pan location (moves in plane of surface being touched)
+                // move panningSideNode to pan location (moves in plane of surface being touched)
                 if let sideCoordinates = getSideCoordinatesAt(location), let pastSideCoordinates = getSideCoordinatesAt(pastLocation) {
                     // in PuzzleBox, the sides only need to move in their local y-direction
                     // removeXZ only keeps the local y-component of the pan gesture, to reduce jumping through walls
                     // limitMagnitude helps prevent moving through walls in the allowable pan direction
                     let deltaPanLocal = (sideCoordinates.local - pastSideCoordinates.local).removeXZ().limitMagnitude(to: 0.1)
                     deltaPanWorld = sideCoordinates.world - pastSideCoordinates.world  // scene coordinates
-                    selectedSideNode.localTranslate(by: deltaPanLocal)  // contacts are prevented in render, below
+                    panningSideNode.localTranslate(by: deltaPanLocal)  // contacts are prevented in render, below
                 }
             default:
                 break
@@ -155,7 +155,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     // get side node at location provided by tap gesture
     private func getSideNodeAt(_ location: CGPoint) -> MovableSideNode? {
         var sideNode: MovableSideNode?
-        let hitResults = scnView.hitTest(location, options: nil)  // nil returns closest hit
+        let hitResults = scnView.hitTest(location, options: nil)  // options: nil returns top-most hit
         if let result = hitResults.first(where: { $0.node.parent?.name == "Side" }) {
             sideNode = result.node.parent as? MovableSideNode
         }
@@ -166,7 +166,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func getSideCoordinatesAt(_ location: CGPoint) -> (local: SCNVector3, world: SCNVector3)? {
         var sideCoordinates: (SCNVector3, SCNVector3)?
         let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])
-        if let result = hitResults.first(where: { $0.node.parent == selectedSideNode }) {  // hit must be on selectedSideNode
+        if let result = hitResults.first(where: { $0.node.parent == panningSideNode }) {  // hit must be on panningSideNode
             sideCoordinates = (result.localCoordinates, result.worldCoordinates)
         }
         return sideCoordinates
@@ -222,13 +222,13 @@ extension GameViewController: SCNSceneRendererDelegate {  // requires scnView.de
     // if contact is made, back it out by amount of penetration
     // based on: https://stackoverflow.com/questions/46843254
     func preventContacts() {
-        if let selectedSideNode = selectedSideNode {
-            if let contact = contactWith(selectedSideNode) {
+        if let panningSideNode = panningSideNode {
+            if let contact = contactWith(panningSideNode) {
                 let penetration = Float(contact.penetrationDistance)
                 let transform = SCNMatrix4MakeTranslation(contact.contactNormal.x * penetration,
                                                           contact.contactNormal.y * penetration,
                                                           0)  // don't want/need to correct out-of-scene direction for this puzzle
-                selectedSideNode.transform = SCNMatrix4Mult(selectedSideNode.transform, transform)
+                panningSideNode.transform = SCNMatrix4Mult(panningSideNode.transform, transform)
 //                print(String(format: "contact: (%.1f, %.1f, %.1f), pan: (%+.3f, %+.3f, %+.3f), mag: %.3f, pen: %.3f",
 //                             contact.contactNormal.x, contact.contactNormal.y, contact.contactNormal.z,
 //                             deltaPanWorld.x, deltaPanWorld.y, deltaPanWorld.z,
