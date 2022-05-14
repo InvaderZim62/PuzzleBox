@@ -50,7 +50,8 @@ struct Box {
     static let height = 10.0
     static let width = 10.0
     static let wallThickness = 0.5
-    static let gap = 0.01
+    static let gap = 0.01  // gap between sides, to reduce contacts
+    static let tolerance = 0.95  // reduction in rail size, to reduce contacts (not really needed)
 }
 
 class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // delegate needed for func gestureRecognizer (bottom of file)
