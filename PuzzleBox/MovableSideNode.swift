@@ -7,7 +7,7 @@
 //             y
 //             |__
 //            /| /|
-//     width / |/ |
+//    length / |/ |
 //          /  /  |
 //         /_ /   |
 //         |  |  ---- x
@@ -31,7 +31,7 @@ class MovableSideNode: SCNNode {
         super.init(coder: coder)
     }
     
-    init(width: Double, height: Double, wallThickness: Double, isLeft: Bool) {
+    init(length: Double, height: Double, wallThickness: Double, isLeft: Bool) {
         super.init()
         name = "Side"
         sideNumber = MovableSideNode.numberFactory
@@ -39,15 +39,15 @@ class MovableSideNode: SCNNode {
         let outsideHeight = isLeft ? height : height - wallThickness
         let yPosition = isLeft ? Float(wallThickness) / 2 : 0
         
-        let outside = SCNBox(width: wallThickness, height: outsideHeight, length: width - 2 * wallThickness, chamferRadius: 0)
+        let outside = SCNBox(width: wallThickness, height: outsideHeight, length: length - 2 * wallThickness, chamferRadius: 0)
         let outsideNode = createNodeFrom(geometry: outside, withColor: Box.sideColors[sideNumber])
         outsideNode.position = SCNVector3(x: -Float(wallThickness), y: 0, z: 0)
         
-        let middle = SCNBox(width: wallThickness, height: height - 3 * wallThickness, length: width - 4 * wallThickness, chamferRadius: 0)
+        let middle = SCNBox(width: wallThickness, height: height - 3 * wallThickness, length: length - 4 * wallThickness, chamferRadius: 0)
         let middleNode = createNodeFrom(geometry: middle, withColor: Box.sideColors[sideNumber])
         middleNode.position = SCNVector3(x: 0, y: yPosition, z: 0)
         
-        let inside = SCNBox(width: wallThickness, height: height - 5 * wallThickness, length: width - 2 * wallThickness, chamferRadius: 0)
+        let inside = SCNBox(width: wallThickness, height: height - 5 * wallThickness, length: length - 2 * wallThickness, chamferRadius: 0)
         let insideNode = createNodeFrom(geometry: inside, withColor: Box.sideColors[sideNumber])
         insideNode.position = SCNVector3(x: Float(wallThickness), y: yPosition, z: 0)
     }

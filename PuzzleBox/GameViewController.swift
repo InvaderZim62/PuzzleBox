@@ -22,7 +22,7 @@
 //                       y
 //              _________|___________
 //            /          |           /|
-//     width /           |          / |
+//    length /           |          / |
 //          /                      /  |
 //         /_____________________ /   |
 //         |                     |  ---- x
@@ -31,9 +31,9 @@
 //         |         /           | /
 //         |________/____________|/
 //                 z
-//                 length
+//                 width
 //
-//  Side orientations (front and back are part of inner box)
+//  Side orientations (front and back are part of inner box):
 //
 //                     top
 //                      ____ y
@@ -61,9 +61,9 @@ import QuartzCore
 import SceneKit
 
 struct Box {
-    static let length = 15.0  // web-site dimensions divided by 10
+    static let width = 15.0  // web-site dimensions divided by 10
     static let height = 10.0
-    static let width = 10.0
+    static let length = 10.0
     static let wallThickness = 0.5
     static let gap = 0.01  // gap between sides, to reduce contacts
     static let tolerance = 0.95  // reduction in rail size, to reduce contacts (not really needed)
@@ -105,33 +105,33 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     }
     
     private func createPuzzleBox() {
-        let horizontalOffset = Box.length / 2 - 1.5 * Box.wallThickness
+        let horizontalOffset = Box.width / 2 - 1.5 * Box.wallThickness
         let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
 
-        let leftSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
+        let leftSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
         sideNodes.append(leftSideNode)
         
-        let rightSideNode = MovableSideNode(width: Box.width, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
+        let rightSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
         rightSideNode.position = SCNVector3(horizontalOffset + Box.gap, -Box.wallThickness / 2, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
         sideNodes.append(rightSideNode)
 
-        let topSideNode = MovableSideNode(width: Box.width, height: Box.length, wallThickness: Box.wallThickness, isLeft: false)
+        let topSideNode = MovableSideNode(length: Box.length, height: Box.width, wallThickness: Box.wallThickness, isLeft: false)
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
         topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset + Box.gap, 0)
         scnScene.rootNode.addChildNode(topSideNode)
         sideNodes.append(topSideNode)
 
-        let bottomSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
+        let bottomSideNode = MovableSideNode(length: Box.length, height: Box.width - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
         bottomSideNode.transform = SCNMatrix4Rotate(bottomSideNode.transform, .pi / 2, 0, 0, 1)
         bottomSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
         scnScene.rootNode.addChildNode(bottomSideNode)
         sideNodes.append(bottomSideNode)
         
-        let innerBoxNode = InnerBoxNode(width: Box.length, height: Box.height, depth: Box.width, wallThickness: Box.wallThickness)
+        let innerBoxNode = InnerBoxNode(width: Box.width, height: Box.height, depth: Box.length, wallThickness: Box.wallThickness)
         innerBoxNode.position = SCNVector3(0, 0, 0)
         scnScene.rootNode.addChildNode(innerBoxNode)
     }
@@ -218,7 +218,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func rotateCameraAroundBoardCenter(deltaAngle: CGFloat) {
         cameraNode.transform = SCNMatrix4Rotate(cameraNode.transform, Float(deltaAngle), 1, 0, 0)
         let cameraAngle = CGFloat(cameraNode.eulerAngles.x)
-        let cameraDistance = CGFloat(3 * Box.length)
+        let cameraDistance = CGFloat(3 * Box.width)
         cameraNode.position = SCNVector3(0, -cameraDistance * sin(cameraAngle), cameraDistance * cos(cameraAngle))
     }
 
