@@ -33,7 +33,7 @@
 //                 z
 //                 width
 //
-//  Side orientations (front and back are part of inner box):
+//  Side orientations after rotating (front and back are parts of inner box):
 //
 //                     top
 //                      ____ y
@@ -49,10 +49,10 @@
 //                    bottom
 //  Notes:
 //  - each side node only needs to move along its local y-axis to solve the puzzle
-//  - handlePan only uses the local y coordinate of the gesture to move the side (minimizes overlapping walls)
+//  - handlePan only uses the local y coordinate of the gesture to move the side (minimizes contacting walls)
 //  - the pan gesture is also computed in world (screen) coordinates
 //  - contact.contactNormal is always in one of the primary screen coordinate directions, since all surfaces are aligned with screen axes
-//  - contacts are corrected if they are opposite the pan direction by some margin
+//  - contacts are only corrected if they are opposite the pan direction by some margin
 //  - the correction is made by subtracting contact.penetrationDistance in the direction of contactNormal before the scene is rendered
 //
 
@@ -107,7 +107,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     private func createPuzzleBox() {
         let horizontalOffset = Box.width / 2 - 1.5 * Box.wallThickness
         let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
-
+        
+        // left and right sides are same, except left outer wall overhangs more (handled inside MovableSideWall with isLeft flag)
+        // bottom side is a scaled version of right side ("height" is wallThickness smaller)
+        
         let leftSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
