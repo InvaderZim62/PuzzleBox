@@ -19,19 +19,34 @@
 //  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
-//  Side node orientations:
-//                     Top
+//                       y
+//              _________|___________
+//            /          |           /|
+//     width /           |          / |
+//          /                      /  |
+//         /_____________________ /   |
+//         |                     |  ---- x
+//         |                     |   /
+//  height |          /          |  /
+//         |         /           | /
+//         |________/____________|/
+//                 z
+//                 length
+//
+//  Side orientations (front and back are part of inner box)
+//
+//                     top
 //                      ____ y
 //                     /|
 //         y          z |            y
 //         |            x            | z
-//    Left |____ x             x ____|/ Right
+//    left |____ x             x ____|/ right
 //        /             x
 //       z              |
 //                y ____|
 //                     /
 //                    z
-//                    Bottom
+//                    bottom
 //  Notes:
 //  - each side node only needs to move along its local y-axis to solve the puzzle
 //  - handlePan only uses the local y coordinate of the gesture to move the side (minimizes overlapping walls)
@@ -52,6 +67,8 @@ struct Box {
     static let wallThickness = 0.5
     static let gap = 0.01  // gap between sides, to reduce contacts
     static let tolerance = 0.95  // reduction in rail size, to reduce contacts (not really needed)
+    static let sideColors = [#colorLiteral(red: 0.4063876867, green: 0.2877367139, blue: 0.1616210639, alpha: 1), #colorLiteral(red: 0.4063876867, green: 0.2877367139, blue: 0.1616210639, alpha: 1), #colorLiteral(red: 0.9024919868, green: 0.6425532103, blue: 0.3708539009, alpha: 1), #colorLiteral(red: 0.8656053543, green: 0.6216112971, blue: 0.3498241901, alpha: 1), #colorLiteral(red: 0.6290025115, green: 0.4477853179, blue: 0.2590831518, alpha: 1), #colorLiteral(red: 0.6290025115, green: 0.4477853179, blue: 0.2590831518, alpha: 1)]  // left, right, top, bottom, front, back
+    static let railColor = #colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1)
 }
 
 class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // delegate needed for func gestureRecognizer (bottom of file)
@@ -108,15 +125,15 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         scnScene.rootNode.addChildNode(topSideNode)
         sideNodes.append(topSideNode)
 
-        let floorSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
-        floorSideNode.transform = SCNMatrix4Rotate(floorSideNode.transform, .pi / 2, 0, 0, 1)
-        floorSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
-        scnScene.rootNode.addChildNode(floorSideNode)
-        sideNodes.append(floorSideNode)
+        let bottomSideNode = MovableSideNode(width: Box.width, height: Box.length - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
+        bottomSideNode.transform = SCNMatrix4Rotate(bottomSideNode.transform, .pi / 2, 0, 0, 1)
+        bottomSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
+        scnScene.rootNode.addChildNode(bottomSideNode)
+        sideNodes.append(bottomSideNode)
         
-        let boxNode = InnerBoxNode(width: Box.length, height: Box.height, depth: Box.width, wallThickness: Box.wallThickness)
-        boxNode.position = SCNVector3(0, 0, 0)
-        scnScene.rootNode.addChildNode(boxNode)
+        let innerBoxNode = InnerBoxNode(width: Box.length, height: Box.height, depth: Box.width, wallThickness: Box.wallThickness)
+        innerBoxNode.position = SCNVector3(0, 0, 0)
+        scnScene.rootNode.addChildNode(innerBoxNode)
     }
     
     // MARK: - Gesture actions
