@@ -79,7 +79,6 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     
     var pastLocation = CGPoint.zero
     var isCameraPanning = true
-    var sideNodes = [MovableSideNode]()
     var deltaPanWorld = SCNVector3(0, 0, 0)
     var panningSideNode: MovableSideNode?
 
@@ -114,25 +113,21 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
         let leftSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
         leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
         scnScene.rootNode.addChildNode(leftSideNode)
-        sideNodes.append(leftSideNode)
         
         let rightSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
         rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
         rightSideNode.position = SCNVector3(horizontalOffset + Box.gap, -Box.wallThickness / 2, 0)
         scnScene.rootNode.addChildNode(rightSideNode)
-        sideNodes.append(rightSideNode)
 
         let topSideNode = MovableSideNode(length: Box.length, height: Box.width, wallThickness: Box.wallThickness, isLeft: false)
         topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
         topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset + Box.gap, 0)
         scnScene.rootNode.addChildNode(topSideNode)
-        sideNodes.append(topSideNode)
 
         let bottomSideNode = MovableSideNode(length: Box.length, height: Box.width - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
         bottomSideNode.transform = SCNMatrix4Rotate(bottomSideNode.transform, .pi / 2, 0, 0, 1)
         bottomSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
         scnScene.rootNode.addChildNode(bottomSideNode)
-        sideNodes.append(bottomSideNode)
         
         let innerBoxNode = InnerBoxNode(width: Box.width, height: Box.height, depth: Box.length, wallThickness: Box.wallThickness)
         innerBoxNode.position = SCNVector3(0, 0, 0)
