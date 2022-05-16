@@ -12,43 +12,20 @@
 //  Delete art.scnassets (move to Trash)
 //
 //  Lessons learned:
+//  Initially, I made the nodes dynamic, before switching to kinematic.  These are some some of the
+//  lessons I learned along the way, even though they are not all applicable to the final product.
 //  - parent node's physics properties don't propagate to children (set each child separately)
-//  - if dynamic, nothing keeps the children nodes attached to the parent (they can all fall apart under gravity or collisions)
+//  - if dynamic, nothing keeps the children nodes attached to the parent; they can all fall apart under gravity or collisions
+//  - I tried combining each side's three nodes into a single node using flattening, to keep them together.  It did keep
+//    them together, but the resultant shape did not include the stepped sides (replaced them with ramps), preventing the
+//    sides from fitting into each other's steps
 //  - you must set flattenedNode = parentNode.flattenedClone() outside the parent node class (flattening is not used in this app)
 //  - flattened node's physics body shape does not follow the individual children closely, and can't be adjusted
 //  - to see the flattened node's shape, set scnView.debugOptions = SCNDebugOptions.showPhysicsShapes
 //  - flattenedClone() requires parent node to implement override init() { super.init() }
 //
-//                       y
-//              _________|___________
-//            /          |           /|
-//    length /           |          / |
-//          /                      /  |
-//         /_____________________ /   |
-//         |                     |  ---- x
-//         |                     |   /
-//  height |          /          |  /
-//         |         /           | /
-//         |________/____________|/
-//                 z
-//                 width
-//
-//  Side orientations after rotating (front and back are parts of inner box):
-//
-//                     top
-//                      ____ y
-//                     /|
-//         y          z |            y
-//         |            x            | z
-//    left |____ x             x ____|/ right
-//        /             x
-//       z              |
-//                y ____|
-//                     /
-//                    z
-//                    bottom
 //  Notes:
-//  - each side node only needs to move along its local y-axis to solve the puzzle
+//  - each side node only needs to move along its local y-axis to solve the puzzle (see picture in PuzzleBoxNode's header)
 //  - handlePan only uses the local y coordinate of the gesture to move the side (minimizes contacting walls)
 //  - the pan gesture is also computed in world (screen) coordinates
 //  - contact.contactNormal is always in one of the primary screen coordinate directions, since all surfaces are aligned with screen axes
@@ -77,18 +54,21 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     var scnScene: SCNScene!
     var cameraNode: SCNNode!
     
+    let puzzleBoxNode = PuzzleBoxNode(length: Box.length, height: Box.height, width: Box.width, wallThickness: Box.wallThickness)
     var pastLocation = CGPoint.zero
     var isCameraPanning = true
     var deltaPanWorld = SCNVector3(0, 0, 0)
     var panningSideNode: MovableSideNode?
-
+    
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupScene()
         setupCamera()
-        createPuzzleBox()
-        
+        scnScene.rootNode.addChildNode(puzzleBoxNode)
+
         // add gestures to scnView
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         pan.maximumNumberOfTouches = 1  // prevents panning during rotation
@@ -101,37 +81,6 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
             let cameraPanGesture = panGestures.first!
             cameraPanGesture.require(toFail: pan)
         }
-    }
-    
-    private func createPuzzleBox() {
-        let horizontalOffset = Box.width / 2 - 1.5 * Box.wallThickness
-        let verticalOffset = Box.height / 2 - 1.5 * Box.wallThickness
-        
-        // left and right sides are same, except left outer wall overhangs more (handled inside MovableSideWall with isLeft flag)
-        // bottom side is a scaled version of right side ("height" is wallThickness smaller)
-        
-        let leftSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: true)
-        leftSideNode.position = SCNVector3(-horizontalOffset - Box.gap, 0, 0)
-        scnScene.rootNode.addChildNode(leftSideNode)
-        
-        let rightSideNode = MovableSideNode(length: Box.length, height: Box.height, wallThickness: Box.wallThickness, isLeft: false)
-        rightSideNode.transform = SCNMatrix4Rotate(rightSideNode.transform, .pi, 0, 1, 0)  // rotate before setting position, to work on iPad device
-        rightSideNode.position = SCNVector3(horizontalOffset + Box.gap, -Box.wallThickness / 2, 0)
-        scnScene.rootNode.addChildNode(rightSideNode)
-
-        let topSideNode = MovableSideNode(length: Box.length, height: Box.width, wallThickness: Box.wallThickness, isLeft: false)
-        topSideNode.transform = SCNMatrix4Rotate(topSideNode.transform, -.pi / 2, 0, 0, 1)
-        topSideNode.position = SCNVector3(Box.wallThickness / 2, verticalOffset + Box.gap, 0)
-        scnScene.rootNode.addChildNode(topSideNode)
-
-        let bottomSideNode = MovableSideNode(length: Box.length, height: Box.width - Box.wallThickness, wallThickness: Box.wallThickness, isLeft: false)
-        bottomSideNode.transform = SCNMatrix4Rotate(bottomSideNode.transform, .pi / 2, 0, 0, 1)
-        bottomSideNode.position = SCNVector3(0, -verticalOffset - Box.gap, 0)
-        scnScene.rootNode.addChildNode(bottomSideNode)
-        
-        let innerBoxNode = InnerBoxNode(width: Box.width, height: Box.height, depth: Box.length, wallThickness: Box.wallThickness)
-        innerBoxNode.position = SCNVector3(0, 0, 0)
-        scnScene.rootNode.addChildNode(innerBoxNode)
     }
     
     // MARK: - Gesture actions

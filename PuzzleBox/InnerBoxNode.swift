@@ -27,7 +27,7 @@ class InnerBoxNode: SCNNode {
     
     init(width: Double, height: Double, depth: Double, wallThickness: Double) {
         super.init()
-        name = "Box"
+        name = "Inner Box"
         createSideWithRails(width: width, height: height, depth: depth, wallThickness: wallThickness, isFront: true)
         createSideWithRails(width: width, height: height, depth: depth, wallThickness: wallThickness, isFront: false)
     }
