@@ -1,4 +1,4 @@
-# PuzzleBox
+# Puzzle Box
 
 This is a 10-step Japanese puzzle box.  The walls are interlocked, so you must figure out the sequence
 of sliding motions to open the box.  My cousin had one when I was a kid, and I thought it was fasinating.
