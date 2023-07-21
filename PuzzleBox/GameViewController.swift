@@ -12,7 +12,7 @@
 //  Delete art.scnassets (move to Trash)
 //
 //  Lessons learned:
-//  Initially, I made the nodes dynamic, before switching to kinematic.  These are some some of the
+//  Initially, I made the nodes dynamic, before switching to kinematic.  These are some of the
 //  lessons I learned along the way, even though they are not all applicable to the final product.
 //  - parent node's physics properties don't propagate to children (set each child separately)
 //  - if dynamic, nothing keeps the children nodes attached to the parent; they can all fall apart under gravity or collisions
@@ -130,7 +130,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     // convert location from screen to local (sideNode) and world (scene) coordinates
     private func getSideCoordinatesAt(_ location: CGPoint) -> (local: SCNVector3, world: SCNVector3)? {
         var sideCoordinates: (SCNVector3, SCNVector3)?
-        let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])
+        let hitResults = scnView.hitTest(location, options: [.searchMode: SCNHitTestSearchMode.all.rawValue])  // return all hits
         if let result = hitResults.first(where: { $0.node.parent == panningSideNode }) {  // hit must be on panningSideNode
             sideCoordinates = (result.localCoordinates, result.worldCoordinates)
         }

@@ -3,16 +3,15 @@
 //  PuzzleBox
 //
 //  Created by Phil Stern on 5/9/22.
-//
 //            ________________   __
 //           ----------------|  -- thickness     ---------------------------
 //           |              ||                   | ===================  || |
 //         ________________ ||                   |                      || |
-//        ----------------| |/                   | ||       rails       || |
-//        |              ||--   --               | ||   (inside face)   || |
-// height |     front    ||    / depth           | ||                      |
-//        |              |/  --                  | ||  ==================  |
-//        ----------------                       ---------------------------
+//        ----------------| |/  __               | ||       rails       || |
+//        |              ||--    /               | ||   (inside face)   || |
+// height |     front    ||     / depth          | ||                      |
+//        |              |/    /                 | ||  ==================  |
+//        ----------------   --                  ---------------------------
 //             width
 //
 
@@ -32,9 +31,10 @@ class InnerBoxNode: SCNNode {
         createSideWithRails(width: width, height: height, depth: depth, wallThickness: wallThickness, isFront: false)
     }
     
+    // Note: sideNode is added to InnerBoxNode, railNodes are added to sideNode
     private func createSideWithRails(width: Double, height: Double, depth: Double, wallThickness: Double, isFront: Bool) {
         let sign: Float = isFront ? 1 : -1
-//        let color = isFront ? Side.colors.last!.withAlphaComponent(0.4) : Side.colors.last!  // make front panel see-through
+//        let color = isFront ? Box.sideColors[4].withAlphaComponent(0.4) : Box.sideColors[4]  // make front panel see-through
         let color: UIColor = isFront ? Box.sideColors[4] : Box.sideColors[5]
 
         let side = SCNBox(width: width, height: height, length: wallThickness, chamferRadius: 0)
