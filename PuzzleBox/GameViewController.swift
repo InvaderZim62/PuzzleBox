@@ -141,7 +141,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {  // de
     
     private func setupView() {
         scnView = self.view as? SCNView
-        scnView.allowsCameraControl = true  // allow standard camera controls with swiping
+        scnView.allowsCameraControl = true  // allow standard camera controls with panning
         scnView.showsStatistics = false
         scnView.autoenablesDefaultLighting = true
         scnView.isPlaying = true  // prevent SceneKit from entering a "paused" state, if there isn't anything to animate
